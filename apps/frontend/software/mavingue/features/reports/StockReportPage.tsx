@@ -37,13 +37,11 @@ export function StockReportPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  // Dados para o gráfico de evolução do stock
   const stockEvolution = useMemo(() => {
     const monthMap: Record<string, { valorEmStock: number; quantidade: number; nome: string }> = {};
     const months = [];
     const now = new Date();
 
-    // Últimos 6 meses
     for (let i = 5; i >= 0; i--) {
       const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
       const monthKey = `${date.getFullYear()}-${date.getMonth() + 1}`;
@@ -52,7 +50,6 @@ export function StockReportPage() {
       monthMap[monthKey] = { valorEmStock: 0, quantidade: 0, nome: monthName };
     }
 
-    // Calcular valor em stock por mês baseado nos movimentos
     movements.forEach((movement) => {
       if (!movement.criadoEm) return;
       const date = new Date(movement.criadoEm);
@@ -70,7 +67,6 @@ export function StockReportPage() {
       }
     });
 
-    // Acumular valores (stock corrente)
     let valorAcumulado = 0;
     let quantidadeAcumulada = 0;
     
@@ -102,9 +98,7 @@ export function StockReportPage() {
           <p className="text-xs font-semibold uppercase tracking-[0.35em] text-cyan-200">Relatorio de stock</p>
           <h1 className="mt-3 text-3xl font-black tracking-tight">A carregar dados...</h1>
         </div>
-        <div className="rounded-[28px] border border-slate-200 bg-slate-50 px-6 py-14 text-center text-sm text-slate-500">
-          A carregar relatorio...
-        </div>
+        <div className="rounded-[28px] border border-slate-200 bg-slate-50 px-6 py-14 text-center text-sm text-slate-500">A carregar relatorio...</div>
       </main>
     );
   }
@@ -116,25 +110,19 @@ export function StockReportPage() {
           <p className="text-xs font-semibold uppercase tracking-[0.35em] text-cyan-200">Relatorio de stock</p>
           <h1 className="mt-3 text-3xl font-black tracking-tight">Erro</h1>
         </div>
-        <div className="rounded-[24px] border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
-          {error}
-        </div>
+        <div className="rounded-[24px] border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">{error}</div>
       </main>
     );
   }
 
   return (
     <main className="grid gap-6">
-      {/* Cabeçalho */}
       <section className="rounded-[32px] bg-gradient-to-br from-slate-950 via-slate-900 to-cyan-600 p-6 text-white shadow-lg shadow-slate-950/10">
         <p className="text-xs font-semibold uppercase tracking-[0.35em] text-cyan-200">Relatorio de stock</p>
         <h1 className="mt-3 text-3xl font-black tracking-tight">Valor restante e detalhe do inventario</h1>
-        <p className="mt-2 text-sm text-cyan-100">
-          Evolução do stock, valor em inventário e monitoramento de produtos
-        </p>
+        <p className="mt-2 text-sm text-cyan-100">Evolução do stock, valor em inventário e monitoramento de produtos</p>
       </section>
 
-      {/* Cards principais */}
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {[
           { label: "Valor total em stock", value: formatMoney(analytics.valorTotal), icon: Layers3 },
@@ -159,19 +147,14 @@ export function StockReportPage() {
         })}
       </section>
 
-      {/* GRÁFICO DE EVOLUÇÃO DO STOCK */}
       <section className="rounded-[32px] border border-slate-200 bg-white p-6 shadow-sm">
         <div className="flex items-center gap-3 mb-6">
           <div className="p-2 bg-cyan-50 rounded-xl">
             <TrendingUp className="h-5 w-5 text-cyan-600" />
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">
-              Evolução do Stock
-            </p>
-            <h2 className="text-xl font-black text-slate-900 mt-1">
-              Valor em inventário por mês
-            </h2>
+            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">Evolução do Stock</p>
+            <h2 className="text-xl font-black text-slate-900 mt-1">Valor em inventário por mês</h2>
           </div>
         </div>
 
@@ -184,7 +167,6 @@ export function StockReportPage() {
                   <stop offset="95%" stopColor="#0891b2" stopOpacity={0.02} />
                 </linearGradient>
               </defs>
-
               <Tooltip
                 cursor={{ stroke: "#e5e7eb", strokeWidth: 1, strokeDasharray: "4 4" }}
                 contentStyle={{
@@ -196,76 +178,40 @@ export function StockReportPage() {
                 }}
                 labelStyle={{ color: "#6b7280", fontWeight: 600, marginBottom: "4px" }}
                 itemStyle={{ color: "#111827", fontWeight: 700 }}
-                formatter={(value: number) => [formatMoney(value), "Valor em Stock"]}
+                formatter={(value) => {
+                  const numValue = Number(value);
+                  return [formatMoney(numValue), "Valor em Stock"];
+                }}
               />
-
-              <XAxis
-                dataKey="mes"
-                axisLine={false}
-                tickLine={false}
-                tick={{ fill: "#9ca3af", fontSize: 12 }}
-                dy={10}
-              />
-
+              <XAxis dataKey="mes" axisLine={false} tickLine={false} tick={{ fill: "#9ca3af", fontSize: 12 }} dy={10} />
               <YAxis hide domain={["dataMin - 10000", "dataMax + 20000"]} />
-
-              <Area
-                type="monotone"
-                dataKey="valorEmStock"
-                stroke="#0891b2"
-                strokeWidth={3}
-                fillOpacity={1}
-                fill="url(#stockGradient)"
-                activeDot={{ r: 6, fill: "#0891b2" }}
-                animationDuration={800}
-              />
+              <Area type="monotone" dataKey="valorEmStock" stroke="#0891b2" strokeWidth={3} fillOpacity={1} fill="url(#stockGradient)" activeDot={{ r: 6, fill: "#0891b2" }} animationDuration={800} />
             </AreaChart>
           </ResponsiveContainer>
         </div>
 
-        {/* Resumo do gráfico */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 pt-4 border-t border-slate-100">
           <div className="text-center">
-            <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">
-              Stock Atual
-            </p>
+            <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Stock Atual</p>
+            <p className="text-lg font-bold text-slate-900">{formatMoney(analytics.valorTotal)}</p>
+          </div>
+          <div className="text-center">
+            <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Pico Máximo</p>
+            <p className="text-lg font-bold text-cyan-600">{formatMoney(Math.max(...stockEvolution.map((d) => d.valorEmStock), 0))}</p>
+          </div>
+          <div className="text-center">
+            <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Variação</p>
             <p className="text-lg font-bold text-slate-900">
-              {formatMoney(analytics.valorTotal)}
+              {stockEvolution.length >= 2 ? formatMoney(stockEvolution[stockEvolution.length - 1].valorEmStock - stockEvolution[0].valorEmStock) : formatMoney(0)}
             </p>
           </div>
           <div className="text-center">
-            <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">
-              Pico Máximo
-            </p>
-            <p className="text-lg font-bold text-cyan-600">
-              {formatMoney(Math.max(...stockEvolution.map((d) => d.valorEmStock), 0))}
-            </p>
-          </div>
-          <div className="text-center">
-            <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">
-              Variação
-            </p>
-            <p className="text-lg font-bold text-slate-900">
-              {stockEvolution.length >= 2
-                ? formatMoney(
-                    stockEvolution[stockEvolution.length - 1].valorEmStock -
-                      stockEvolution[0].valorEmStock
-                  )
-                : formatMoney(0)}
-            </p>
-          </div>
-          <div className="text-center">
-            <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">
-              Unidades
-            </p>
-            <p className="text-lg font-bold text-slate-900">
-              {analytics.unidades}
-            </p>
+            <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Unidades</p>
+            <p className="text-lg font-bold text-slate-900">{analytics.unidades}</p>
           </div>
         </div>
       </section>
 
-      {/* Produtos com maior valor e últimos movimentos */}
       <section className="grid gap-6 xl:grid-cols-2">
         <div className="rounded-[32px] border border-slate-200 bg-white p-6 shadow-sm">
           <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">Produtos com maior valor</p>
@@ -275,9 +221,7 @@ export function StockReportPage() {
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="font-bold text-slate-900">{row.produtoNome}</p>
-                    <p className="mt-1 text-xs text-slate-500">
-                      {row.quantidade} un. | minimo {row.stockMinimo}
-                    </p>
+                    <p className="mt-1 text-xs text-slate-500">{row.quantidade} un. | minimo {row.stockMinimo}</p>
                   </div>
                   <div className="text-right">
                     <p className="font-black text-cyan-700">{formatMoney(row.valorEmStock)}</p>
@@ -301,8 +245,7 @@ export function StockReportPage() {
                   </div>
                   <div className="text-right">
                     <p className={`font-black ${movement.tipo === "ENTRADA" ? "text-emerald-700" : "text-rose-700"}`}>
-                      {movement.tipo === "ENTRADA" ? "+" : "-"}
-                      {movement.quantidade}
+                      {movement.tipo === "ENTRADA" ? "+" : "-"}{movement.quantidade}
                     </p>
                     <p className="mt-1 text-xs text-slate-500">{movement.tipo}</p>
                   </div>
