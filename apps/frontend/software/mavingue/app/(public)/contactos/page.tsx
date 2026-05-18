@@ -44,15 +44,15 @@ export default function ContactosPage() {
                 <Phone size={22} />
               </div>
               <h3 className="font-bold text-slate-800 mb-2">{t("contact.phone")}</h3>
-              <p className="text-slate-500 text-sm">+258 84 000 0000</p>
-              <p className="text-slate-500 text-sm">+258 85 000 0000</p>
+              <p className="text-slate-500 text-sm">+258 86 218 0576</p>
+              {/* <p className="text-slate-500 text-sm">+258 85 000 0000</p> */}
             </div>
             <div className="bg-slate-50 rounded-xl p-6 text-center group hover:bg-orange-50 transition-colors">
               <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4 text-orange-600 group-hover:bg-orange-600 group-hover:text-white transition-colors">
                 <Mail size={22} />
               </div>
               <h3 className="font-bold text-slate-800 mb-2">{t("contact.email")}</h3>
-              <p className="text-slate-500 text-sm">info@mavingue.co.mz</p>
+              <p className="text-slate-500 text-sm">estaleiromavingue@gmail.com</p>
             </div>
             <div className="bg-slate-50 rounded-xl p-6 text-center group hover:bg-orange-50 transition-colors">
               <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4 text-orange-600 group-hover:bg-orange-600 group-hover:text-white transition-colors">
