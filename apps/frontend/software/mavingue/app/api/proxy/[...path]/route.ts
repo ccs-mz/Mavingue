@@ -1,3 +1,4 @@
+
 import { NextRequest, NextResponse } from "next/server";
 
 const BACKEND = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
@@ -22,6 +23,18 @@ async function fetchWithTimeout(url: string, init: RequestInit, timeout: number)
     clearTimeout(timeoutId);
     throw error;
   }
+}
+
+// Fun redirecionar  login
+function redirectToLogin(req: NextRequest) {
+  const loginUrl = new URL("/auth/login", req.url);
+  const response = NextResponse.redirect(loginUrl);
+  
+  // Limpar os cookies
+  response.cookies.delete("token");
+  response.cookies.delete("role");
+  
+  return response;
 }
 
 async function handler(req: NextRequest, ctx: { params: Promise<{ path: string[] }> }) {
@@ -56,6 +69,12 @@ async function handler(req: NextRequest, ctx: { params: Promise<{ path: string[]
     try {
       const upstream = await fetchWithTimeout(url, init, TIMEOUT_MS);
       
+      // Se token expirado (401), redireciona para login
+      if (upstream.status === 401) {
+        console.log("Token expirado, redirecionando para login");
+        return redirectToLogin(req);
+      }
+      
       const outHeaders = new Headers();
       const uct = upstream.headers.get("content-type");
       if (uct) outHeaders.set("content-type", uct);
@@ -63,7 +82,6 @@ async function handler(req: NextRequest, ctx: { params: Promise<{ path: string[]
 
       const data = await upstream.arrayBuffer();
       
-      // Se for erro 502/503/504, tenta novamente
       if ((upstream.status === 502 || upstream.status === 503 || upstream.status === 504) && attempt < MAX_RETRIES) {
         console.warn(`⚠️ Proxy: erro ${upstream.status} (tentativa ${attempt}/${MAX_RETRIES}) para ${url}`);
         await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
@@ -81,7 +99,6 @@ async function handler(req: NextRequest, ctx: { params: Promise<{ path: string[]
     }
   }
 
-  //
   console.error(`❌ Proxy: todas as tentativas falharam para ${url}`);
   
   return NextResponse.json(
