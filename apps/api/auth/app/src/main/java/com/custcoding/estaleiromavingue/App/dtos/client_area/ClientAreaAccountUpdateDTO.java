@@ -4,7 +4,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
-public record ClientAreaAccountUpdateDTO(
+public record           ClientAreaAccountUpdateDTO(
         @NotBlank(message = "Nome e obrigatorio")
         @Size(max = 120, message = "Nome excede o limite permitido")
         String nome,
