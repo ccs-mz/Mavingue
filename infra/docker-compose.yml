@@ -1,0 +1,59 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: mavingue-db
+    environment:
+      POSTGRES_DB: mavingue
+      POSTGRES_USER: mavingue
+      POSTGRES_PASSWORD: mavingue
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mavingue -d mavingue"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile.backend
+    container_name: mavingue-backend
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/mavingue
+      SPRING_DATASOURCE_USERNAME: mavingue
+      SPRING_DATASOURCE_PASSWORD: mavingue
+      JWT_SECRET: change-me-in-production
+      BASE_URL: http://localhost:8080
+      FRONT_URL: http://localhost:3000
+      RESEND_API_KEY: dummy
+      EMAIL_FROM: no-reply@example.com
+      CLOUDINARY_URL: cloudinary://dummy
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile.frontend
+    container_name: mavingue-frontend
+    environment:
+      NEXT_PUBLIC_API_URL: http://backend:8080
+      PORT: 3000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
